@@ -8,11 +8,11 @@
 class MY_Model extends CI_Model
 {
 
-    private $sConfigFile = '';
+    private   $sConfigFile = '';
     protected $aConfiguration = array ( );
     protected $aFunctions = array ( );
     protected $aErrors = array ( );
-    private $oError;
+    private   $oError;
 
     public function __construct ( $sConfigFile = FALSE )
     {
@@ -75,6 +75,12 @@ class MY_Model extends CI_Model
     }
     
     
+    /**
+     *
+     * 
+     * @param type $aParamsOut
+     * @return string 
+     */
     private function _bindOutputParams( $aParamsOut )
     {
         $sSql = '';

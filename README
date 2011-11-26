@@ -1,0 +1,5 @@
+This code is not in production quality yet.
+
+The goal is to extend the codeigniter model core class in a way that will allow
+users to easily configure and handle queries into oracle database while calling
+plsql packages. 
