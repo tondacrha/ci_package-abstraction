@@ -948,50 +948,44 @@ class CI_DB_oci10_driver extends CI_DB {
 	 * @return bool
 	 * @see    this::getOutputBinds()
 	 */
-	function getOutputBind($sBind, $sType) {
-		
-		if( isset($this->aOutputBinds[$sBind]) ) {
-			
-			if( $this->aOutputBinds[$sBind]['TYPE'] === $this->_iCursorType ) {
-				
-				if ( class_exists('CI_DB_oci10_result') && is_resource($this->aOutputBinds[$sBind]['VALUE']) ) {
-				
-	        	    $oResult = new CI_DB_oci10_result();
-					$oResult->stmt_id = $this->stmt_id ;
-					$oResult->curs_id = $this->aOutputBinds[$sBind]['VALUE'] ;
-	        	    
-					/*$this->_bToFetch = false ;
-					while( $aRow = oci_fetch_array( $oResult->curs_id, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS ) ) {
-						$oResult->result_array[] = $aRow ;
-						$bFetched = true ;
-					}
-					if( true === $bFetched )
-	                	return $oResult;
-	                else 
-	                	return false ;
-					*/
-					return $oResult;
-	            }else{
-				
-					log_message('error', 'Driver Db_oci10 '."\t".'Object Result not existing '.PHP_EOL."\t\t".'Can\'t Create it.'
-    					. PHP_EOL . " Connexion data "
-        				. PHP_EOL . " username : " . $this->username   
-        				. PHP_EOL . " hostname : " . $this->hostname
-        				. PHP_EOL . " database : " . $this->database
-        				. PHP_EOL . " dbdriver : " . $this->dbdriver
-        				. PHP_EOL . " dbprefix : " . $this->dbprefix
-        				. PHP_EOL . " port     : " . $this->port
-					);
-					redirect(WEB.'index.php/error/work','location'); 
-				}
-				
-			} else {
-				return $this->aOutputBinds[$sBind]['VALUE'] ;				
-			}
-		} else {
-			return false ;
-		}
-	}
+	function getOutputBind ( $sBind, $sType )
+    {
+
+        if ( isset( $this->aOutputBinds[ $sBind ] ) )
+        {
+
+            if ( $this->aOutputBinds[ $sBind ][ 'TYPE' ] === $this->_iCursorType )
+            {
+
+                if ( ! class_exists( 'CI_DB_oci10_result' ) )
+                {
+                    // this case occures when in plsql output paramer is set to NUMBER, VARCHAR2, CLOB, BLOB, ...
+                    // but php awaits cursor. Basically this means php misconfiguration of procedure output params.
+                    throw new Exception('PLSQL output parameter misconfigured. PHP expects cursor, something else provided.', 20000);
+                }
+                
+                if( is_resource( $this->aOutputBinds[ $sBind ][ 'VALUE' ] ) )
+                {
+                    $oResult = new CI_DB_oci10_result();
+                    $oResult->stmt_id = $this->stmt_id;
+                    $oResult->curs_id = $this->aOutputBinds[ $sBind ][ 'VALUE' ];
+                    return $oResult;
+                }
+                else
+                {
+                    return false; // result is not valid resource. Something is wrong
+                }
+            }
+            else
+            {
+                return $this->aOutputBinds[ $sBind ][ 'VALUE' ];
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
 	
 	
 	/**
