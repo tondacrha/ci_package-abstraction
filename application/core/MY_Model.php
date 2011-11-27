@@ -2,23 +2,36 @@
 
 /**
  * Main purpouse of this class is to make codeigniter version 2.x users more
- * happy using plsql procedures stored in Oracle database.
+ * happy using plsql procedures stored in Oracle database packages.
  * 
- * Codeigniter currently do not support bindig of variables and calling 
- * stored procedures directly so users need to write they own helpers, ...
+ * -------------------------------------------------------
+ * Main benefits:
+ * 1) Easy configuration. One file per package, nothing more.
+ * 2) Configure once, use many times
+ * 3) Freedom of use. Can be mixed with Codeigniter database class
+ * 4) No magic done. Database request flow is clean and easy to follow.
+ * 5) Easy error handling
+ * 6) MULTIPLE output parameters
+ * 7) MULTIPLE or NO cursors - depends on user needs
+ * 8) Prefetch setting. Significant request speedup when inteligent configured 
+ * -------------------------------------------------------
  * 
  * This class needs oci10 or sqlrelay database driver to work.
+ * oci10 with fixed error handling. stmt_id insted of conn_id in error handling
  * 
- * This class stores configuration in variables to be able to fully profit from
- * the inharitance concept.
+ * Configuration of this class and its childs is stored in object variables.
+ * This way it can fully profit from the inharitance concept.
  * 
- * OUTPUT PARAMS are mapped to php variable names - so be carfull with naming
- * If params for output or input bind are not valid variable name,
- * an ORA-01036 error is raised. For future use: 
- * regexp for variable name validation [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]* 
+ * -------------------------------------------------------
+ * ATTENTION:
+ * Output params are mapped to php variables names.
+ * Carefull naming of output params in configuration file is needed.
+ * If params for output or input bind are not valid php variable name,
+ * an ORA-01036 error is raised. Eg.: PCUR$out will result in Oracle error.
  * 
- * For now usable only for procedures!!!
- * I will add posibility to call functions, in the future.
+ * For future use (variable name validation regexp): 
+ * [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]* 
+ * -------------------------------------------------------
  * 
  * @author Antonin Crha <a.crha@pixvalley.com>
  */
@@ -89,13 +102,6 @@ class MY_Model extends CI_Model
             $this->_loadConfiguration( $sConfigFile );
         }
     }
-    
-    public function __destruct ()
-    {
-        //@TODO
-        // close result set, connection, etc
-    }
-
 
     /**
      * Loads all necessery configuration files for the abstraction to work
