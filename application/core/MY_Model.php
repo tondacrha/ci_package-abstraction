@@ -164,11 +164,7 @@ class MY_Model extends CI_Model
     {
         $this->db->clearAllBinds(); // Performance tested. No issue here
         $aProcedureDetails = $this->_aConfiguration[ $sProcedure ];
-        
-        if( isset( $aProcedureDetails['PREFETCH'] ) && $aProcedureDetails['PREFETCH'] != '' )
-        {
-            $this->_setPrefetch( $aProcedureDetails['PREFETCH'] );
-        }
+        $this->_setPrefetch( $aProcedureDetails['PREFETCH'] );
         
         $this->_checkInputParams( $aProcedureDetails, $aArguments[0] );        
         $sSqlBinds  = '';
@@ -195,13 +191,23 @@ class MY_Model extends CI_Model
     /**
      * Based on setting in config file sets the prefetch functionality of Oracle
      * oci8 driver will prefetch as many rows (for each cursor), as configured
+     * Also working for sqlrelay.
+     * 
+     * Using a good value in this setting can significantly speed things up.
      * 
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @param integer $iNum 
      */
-    private function _setPrefetch( $iNum )
+    private function _setPrefetch( $iNum = 1 )
     {
-        $this->db->setPrefetch( $iNum );
+        if( is_int($iNum) && $iNum > 0 ){
+            $this->db->setPrefetch( $iNum );
+        }
+        else
+        {
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 4 ] ), $this->getErrorCaller(3) );
+            exit();
+        }
     }
 
     /**
