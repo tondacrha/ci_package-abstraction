@@ -15,19 +15,25 @@ class mpokus extends MY_Model
 
     }
 
-    public function getAllPokus()
+    public function getAllPokus( $iNum )
     {
-        $aIn  = array( 'LABEL' => 'ahoj', 'CFILE' => 'aaa' );
+        $aIn  = array( 'LABEL' => 'ahoj', 'CFILE' => 'aaa', 'PN$rownum' => $iNum );
         if( false === $this->insert( $aIn ) )
         {
             echo $this->getErrorMessage();
         }
         else
         {
-
-            foreach ($this->PCUR_out->result() as $row)
+            if( $this->PCUR_out->isEmpty() )
             {
-                var_dump($row); echo '<br>';
+                echo 'No data';
+            }
+            else
+            {
+                foreach ($this->PCUR_out->result() as $row)
+                {
+                    var_dump($row); echo '<br>';
+                }
             }
         }
         $this->db->trans_commit();
