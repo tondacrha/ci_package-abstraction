@@ -12,14 +12,61 @@
  * This class stores configuration in variables to be able to fully profit from
  * the inharitance concept.
  * 
+ * OUTPUT PARAMS are mapped to php variable names - so be carfull with naming
+ * If params for output or input bind are not valid variable name,
+ * an ORA-01036 error is raised. For future use: 
+ * regexp for variable name validation [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]* 
+ * 
+ * For now usable only for procedures!!!
+ * I will add posibility to call functions, in the future.
+ * 
  * @author Antonin Crha <a.crha@pixvalley.com>
  */
 class MY_Model extends CI_Model
 {
     private   $sConfigFile = '';
+    
+    /**
+     * Stores complete configuration for single model.
+     * All plsql procedures names and their parameters
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @var array
+     */
     protected $aConfiguration = array ( );
+    
+    /**
+     * Stores list of configured procedures. Filled with values from config file
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @var array
+     */
     protected $aFunctions = array ( );
+    
+    /**
+     * For storing loaded error configuratiuon messages from config file
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @var array
+     */
     protected $aErrors = array ( );
+    
+    /**
+     * Stores last error message
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @var string
+     */
+    protected $sLastErrorMessage = '';
+    
+    /**
+     * Stores last error number
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @var integer
+     */
+    protected $iLastErrorNumber  = 0;
+    
+    /**
+     * Contains codeigniter error class. Used for displaying errors.
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @var object 
+     */
     private   $oError;
 
     public function __construct ( $sConfigFile = FALSE )
@@ -64,7 +111,7 @@ class MY_Model extends CI_Model
             exit;
         }
 
-        $this->_callProcedure( $sName, $aArguments );
+        return $this->_request( $sName, $aArguments );
     }
 
     /**
@@ -74,26 +121,64 @@ class MY_Model extends CI_Model
      * Does not need to know the package name because it 
      * is obvios from the object context.
      * 
+     * All process inside this function needs 
+     * only the [0] index of second parameter.
+     * 
      * @author Antonin Crha <a.crha@pixvalley.com>
-     * @param type $sProcedure
-     * @param type $aArguments 
+     * @param string $sProcedure called oracle database object name
+     * @param array $aArguments field of arguments. Only index [0] taken
      */
-    private function _callProcedure ( $sProcedure, $aArguments )
+    private function _request ( $sProcedure, $aArguments )
     {
         $this->db->clearAllBinds();
         $aProcedureDetails = $this->aConfiguration[ $sProcedure ];
-        $aArguments = $aArguments[0]; // Always need just first index.   
-        $this->_checkInputParams( $aProcedureDetails, $aArguments );
         
-        $sSqlBinds = '';
-        $sSqlBinds .= $this->_bindInputParams( $aArguments );
+        $this->_checkInputParams( $aProcedureDetails, $aArguments[0] );        
+        $sSqlBinds  = '';
+        $sSqlBinds .= $this->_bindInputParams( $aArguments[0] );
         $sSqlBinds .= trim( $this->_bindOutputParams( $aProcedureDetails['PARAMS_OUT'] ), ',' );
         
         $sPackage = $aProcedureDetails['PACKAGE'].'.'.$aProcedureDetails['PROCEDURE'];
-        $this->db->query( 'BEGIN ' . $sPackage . '(' . $sSqlBinds . '); END;' );
+        $sQuery = 'BEGIN ' . $sPackage . '(' . $sSqlBinds . '); END;';
         
-        //@TODO
-        //OUTPUT params handling
+        // doing the actual query into database
+        if( false === $this->db->query( $sQuery ) )
+        {
+            $this->sLastErrorMessage = $this->db->getErrorMessage();
+            $this->iLastErrorNumber = $this->db->getErrorNumber();
+            return false;
+        }
+        else
+        {
+                $this->_fillOutputVariables( $aProcedureDetails['PARAMS_OUT'] );
+                return true; // request successfull
+        }
+    }
+    
+    /**
+     * Creates object public variables filled with return from plsql call.
+     * All output variables from config file will be created.
+     * 
+     * In the model where this class is extended, user can get result of call
+     * just accessign the proper variable:
+     * $this-><in config file declared variable name>
+     * 
+     * 
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @param array $aParamsOut Array of output parameters configured in config 
+     */
+    private function _fillOutputVariables( $aParamsOut )
+    {
+        try{
+            foreach( $aParamsOut as $sLabel => $sType )
+            {
+                $this->{$sLabel} = $this->db->getOutputBinds( $sType, $sLabel );
+            }
+        }
+        catch( Exception $e )
+        {
+            printf( $this->oError->show_error( $this->aErrors[ 0 ], $this->aErrors[ 2 ] ), $this->getErrorCaller() );
+        }
     }
     
     /**
@@ -183,6 +268,28 @@ class MY_Model extends CI_Model
     {
         $sFrom = debug_backtrace();
         return $sFrom[ $nStackStep ][ 'file' ] . ' Line: ' . $sFrom[ $nStackStep ][ 'line' ];
+    }
+    
+        /**
+     * Returns the last Oracle database error number
+     * 
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @return integer
+     */
+    public function getErrorNumber()
+    {
+        return $this->iLastErrorNumber;
+    }
+    
+    /**
+     * Returns the last Oracle database error message
+     * 
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @return string Oracle error number
+     */
+    public function getErrorMessage()
+    {
+        return $this->sLastErrorMessage;
     }
 
 }

@@ -18,10 +18,19 @@ class mpokus extends MY_Model
     public function getAllPokus()
     {
         $aIn  = array( 'LABEL' => 'ahoj', 'CFILE' => 'aaa' );
+        if( false === $this->insert( $aIn ) )
+        {
+            echo $this->getErrorMessage();
+        }
+        else
+        {
 
-        $this->insert( $aIn );
-
-        //$this->mpokus->insertPokus();
+            foreach ($this->PCUR_out->result() as $row)
+            {
+                var_dump($row); echo '<br>';
+            }
+        }
+        $this->db->trans_commit();
     }
 
 }

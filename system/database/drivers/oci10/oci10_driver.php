@@ -959,9 +959,7 @@ class CI_DB_oci10_driver extends CI_DB {
 
                 if ( ! class_exists( 'CI_DB_oci10_result' ) )
                 {
-                    // this case occures when in plsql output paramer is set to NUMBER, VARCHAR2, CLOB, BLOB, ...
-                    // but php awaits cursor. Basically this means php misconfiguration of procedure output params.
-                    throw new Exception('PLSQL output parameter misconfigured. PHP expects cursor, something else provided.', 20000);
+                    throw new Exception('Request error. Result class not present.', 20000);
                 }
                 
                 if( is_resource( $this->aOutputBinds[ $sBind ][ 'VALUE' ] ) )

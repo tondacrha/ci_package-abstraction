@@ -65,7 +65,7 @@ $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 
 $db['localhost']['hostname'] = 'localhost/XE';
-$db['localhost']['username'] = 'hr';
+$db['localhost']['username'] = 'HR';
 $db['localhost']['password'] = '860501';
 $db['localhost']['database'] = '';
 $db['localhost']['dbdriver'] = 'oci10';

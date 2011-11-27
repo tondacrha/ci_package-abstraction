@@ -15,7 +15,9 @@ $config[PKG_CONF_PREFIX]['insert'] = array(
         'CFILE',
     ),
     'PARAMS_OUT' => array(
-        'PCUR$out' => 'CURSOR',
+        'PCUR_out' => 'CURSOR',
+        'PN_number' => 'CURSOR',
+        'PV_varchar' => 'VARCHAR',
     ),
 );
 
