@@ -9,14 +9,16 @@ $sPackage = SCHEMA . 'PKG_POKUS_1001';
 $config[PKG_CONF_PREFIX]['insert'] = array(
     'PACKAGE' => $sPackage,
     'PROCEDURE' => 'INSERT_POKUS',
+    'PREFETCH'  => 2000,
     
     'PARAMS_IN' => array(
         'LABEL',
         'CFILE',
+        'PN$rownum'
     ),
     'PARAMS_OUT' => array(
         'PCUR_out' => 'CURSOR',
-        'PN_number' => 'CURSOR',
+        'PN_number' => 'NUMBER',
         'PV_varchar' => 'VARCHAR',
     ),
 );
