@@ -24,7 +24,12 @@
  */
 class MY_Model extends CI_Model
 {
-    private   $sConfigFile = '';
+    /**
+     * Configuration file location. Contains configuration for single package
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @var string 
+     */
+    private $sConfigFile = '';
     
     /**
      * Stores complete configuration for single model.
@@ -79,6 +84,23 @@ class MY_Model extends CI_Model
         {
             $this->_loadConfiguration( $sConfigFile );
         }
+    }
+    
+    /**
+     * Loads all necessery configuration files for the abstraction to work
+     * 
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @param string $sConfigFile Path to configuration file
+     */
+    private function _loadConfiguration ( $sConfigFile )
+    {
+        $this->load->config( $sConfigFile );
+        $this->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
+
+        $this->sConfigFile = $sConfigFile;
+        $this->aConfiguration = $this->config->item( PKG_CONF_PREFIX );
+        $this->aFunctions = array_keys( $this->aConfiguration );
+        $this->aErrors = $this->config->item( ABST_ERROR_PREFIX );
     }
 
     /**
@@ -237,23 +259,6 @@ class MY_Model extends CI_Model
             }
         }
         return false;
-    }
-
-    /**
-     * Loads all necessery configuration files for the abstraction to work
-     * 
-     * @author Antonin Crha <a.crha@pixvalley.com>
-     * @param string $sConfigFile Path to configuration file
-     */
-    private function _loadConfiguration ( $sConfigFile )
-    {
-        $this->load->config( $sConfigFile );
-        $this->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
-
-        $this->sConfigFile = $sConfigFile;
-        $this->aConfiguration = $this->config->item( PKG_CONF_PREFIX );
-        $this->aFunctions = array_keys( $this->aConfiguration );
-        $this->aErrors = $this->config->item( ABST_ERROR_PREFIX );
     }
 
     /**
