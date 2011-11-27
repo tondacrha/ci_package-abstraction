@@ -9,7 +9,7 @@ $sPackage = SCHEMA . 'PKG_POKUS_1001';
 $config[PKG_CONF_PREFIX]['insert'] = array(
     'PACKAGE' => $sPackage,
     'PROCEDURE' => 'INSERT_POKUS',
-    'PREFETCH'  => 2000,
+    'PREFETCH'  => 50,
     
     'PARAMS_IN' => array(
         'LABEL',
@@ -26,6 +26,7 @@ $config[PKG_CONF_PREFIX]['insert'] = array(
 $config[PKG_CONF_PREFIX]['getSingle'] = array(
     'PACKAGE' => $sPackage,
     'PROCEDURE' => 'GET_POKUS',
+    'PREFETCH'  => 50,
 
     'PARAMS_IN' => array(
         'POKUS_ID',
