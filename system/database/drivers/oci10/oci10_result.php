@@ -93,6 +93,27 @@ class CI_DB_oci10_result extends CI_DB_result {
 	function num_total_rows( ){
 		return 0 ;
 	}
+     
+    /**
+     * Answers the question is cursor empty?
+     * 
+     * Performance note: it does not increase the amount of consumed memory.
+     * The result set needs to be loaded into memory anyway.
+     * 
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @return integer
+     */
+    function isEmpty()
+    {
+        if( false === self::result() )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 	
 	// --------------------------------------------------------------------
 
