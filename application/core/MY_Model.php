@@ -74,18 +74,29 @@ class MY_Model extends CI_Model
      */
     private $_oError;
 
-    public function __construct ( $sConfigFile = FALSE )
+    public function __construct ( $sConfigFile = null )
     {
         parent::__construct();
         $this->load->database();
         $this->_oError = & load_class( 'Exceptions', 'core' );
+        $this->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
+        $this->_aErrors = $this->config->item( ABST_ERROR_PREFIX );
 
-        if ( $sConfigFile )
+        // codeigniter will instantiate this class anyway. So the hack with
+        // optional parameter is needed to prevent codeigniter from mess things
+        if ( $sConfigFile !== null )
         {
             $this->_loadConfiguration( $sConfigFile );
         }
     }
     
+    public function __destruct ()
+    {
+        //@TODO
+        // close result set, connection, etc
+    }
+
+
     /**
      * Loads all necessery configuration files for the abstraction to work
      * 
@@ -95,12 +106,11 @@ class MY_Model extends CI_Model
     private function _loadConfiguration ( $sConfigFile )
     {
         $this->load->config( $sConfigFile );
-        $this->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
 
         $this->_sConfigFile = $sConfigFile;
         $this->_aConfiguration = $this->config->item( PKG_CONF_PREFIX );
         $this->_aFunctions = array_keys( $this->_aConfiguration );
-        $this->_aErrors = $this->config->item( ABST_ERROR_PREFIX );
+
     }
 
     /**
@@ -123,13 +133,13 @@ class MY_Model extends CI_Model
 
         if ( !in_array( $sName, $this->_aFunctions ) )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 1 ] ), $sName, APPPATH, $this->_sConfigFile, $this->getErrorCaller() );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 1 ] ), $sName, APPPATH, $this->_sConfigFile, $this->getErrorCaller(1) );
             exit;
         }
 
         if ( count( $aArguments ) > 1 )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller() );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller(1) );
             exit;
         }
 
@@ -155,6 +165,11 @@ class MY_Model extends CI_Model
         $this->db->clearAllBinds(); // Performance tested. No issue here
         $aProcedureDetails = $this->_aConfiguration[ $sProcedure ];
         
+        if( isset( $aProcedureDetails['PREFETCH'] ) && $aProcedureDetails['PREFETCH'] != '' )
+        {
+            $this->_setPrefetch( $aProcedureDetails['PREFETCH'] );
+        }
+        
         $this->_checkInputParams( $aProcedureDetails, $aArguments[0] );        
         $sSqlBinds  = '';
         $sSqlBinds .= $this->_bindInputParams( $aArguments[0] );
@@ -178,6 +193,18 @@ class MY_Model extends CI_Model
     }
     
     /**
+     * Based on setting in config file sets the prefetch functionality of Oracle
+     * oci8 driver will prefetch as many rows (for each cursor), as configured
+     * 
+     * @author Antonin Crha <a.crha@pixvalley.com>
+     * @param integer $iNum 
+     */
+    private function _setPrefetch( $iNum )
+    {
+        $this->db->setPrefetch( $iNum );
+    }
+
+    /**
      * Creates object public variables filled with return from plsql call.
      * All output variables from config file will be created.
      * 
@@ -199,7 +226,7 @@ class MY_Model extends CI_Model
         }
         catch( Exception $e )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller() );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller(1) );
         }
     }
     
