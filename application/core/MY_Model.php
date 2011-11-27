@@ -29,7 +29,7 @@ class MY_Model extends CI_Model
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @var string 
      */
-    private $sConfigFile = '';
+    private $_sConfigFile = '';
     
     /**
      * Stores complete configuration for single model.
@@ -37,48 +37,48 @@ class MY_Model extends CI_Model
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @var array
      */
-    protected $aConfiguration = array ( );
+    private $_aConfiguration = array ( );
     
     /**
      * Stores list of configured procedures. Filled with values from config file
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @var array
      */
-    protected $aFunctions = array ( );
+    private $_aFunctions = array ( );
     
     /**
      * For storing loaded error configuratiuon messages from config file
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @var array
      */
-    protected $aErrors = array ( );
+    private $_aErrors = array ( );
     
     /**
      * Stores last error message
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @var string
      */
-    protected $sLastErrorMessage = '';
+    private $_sLastErrorMessage = '';
     
     /**
      * Stores last error number
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @var integer
      */
-    protected $iLastErrorNumber  = 0;
+    private $_iLastErrorNumber  = 0;
     
     /**
      * Contains codeigniter error class. Used for displaying errors.
      * @author Antonin Crha <a.crha@pixvalley.com>
      * @var object 
      */
-    private   $oError;
+    private $_oError;
 
     public function __construct ( $sConfigFile = FALSE )
     {
         parent::__construct();
         $this->load->database();
-        $this->oError = & load_class( 'Exceptions', 'core' );
+        $this->_oError = & load_class( 'Exceptions', 'core' );
 
         if ( $sConfigFile )
         {
@@ -97,10 +97,10 @@ class MY_Model extends CI_Model
         $this->load->config( $sConfigFile );
         $this->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
 
-        $this->sConfigFile = $sConfigFile;
-        $this->aConfiguration = $this->config->item( PKG_CONF_PREFIX );
-        $this->aFunctions = array_keys( $this->aConfiguration );
-        $this->aErrors = $this->config->item( ABST_ERROR_PREFIX );
+        $this->_sConfigFile = $sConfigFile;
+        $this->_aConfiguration = $this->config->item( PKG_CONF_PREFIX );
+        $this->_aFunctions = array_keys( $this->_aConfiguration );
+        $this->_aErrors = $this->config->item( ABST_ERROR_PREFIX );
     }
 
     /**
@@ -121,15 +121,15 @@ class MY_Model extends CI_Model
     {
         $_error = & load_class( 'Exceptions', 'core' );
 
-        if ( !in_array( $sName, $this->aFunctions ) )
+        if ( !in_array( $sName, $this->_aFunctions ) )
         {
-            printf( $this->oError->show_error( $this->aErrors[ 0 ], $this->aErrors[ 1 ] ), $sName, APPPATH, $this->sConfigFile, $this->getErrorCaller() );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 1 ] ), $sName, APPPATH, $this->_sConfigFile, $this->getErrorCaller() );
             exit;
         }
 
         if ( count( $aArguments ) > 1 )
         {
-            printf( $this->oError->show_error( $this->aErrors[ 0 ], $this->aErrors[ 2 ] ), $this->getErrorCaller() );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller() );
             exit;
         }
 
@@ -152,8 +152,8 @@ class MY_Model extends CI_Model
      */
     private function _request ( $sProcedure, $aArguments )
     {
-        $this->db->clearAllBinds();
-        $aProcedureDetails = $this->aConfiguration[ $sProcedure ];
+        $this->db->clearAllBinds(); // Performance tested. No issue here
+        $aProcedureDetails = $this->_aConfiguration[ $sProcedure ];
         
         $this->_checkInputParams( $aProcedureDetails, $aArguments[0] );        
         $sSqlBinds  = '';
@@ -166,8 +166,8 @@ class MY_Model extends CI_Model
         // doing the actual query into database
         if( false === $this->db->query( $sQuery ) )
         {
-            $this->sLastErrorMessage = $this->db->getErrorMessage();
-            $this->iLastErrorNumber = $this->db->getErrorNumber();
+            $this->_sLastErrorMessage = $this->db->getErrorMessage();
+            $this->_iLastErrorNumber = $this->db->getErrorNumber();
             return false;
         }
         else
@@ -199,7 +199,7 @@ class MY_Model extends CI_Model
         }
         catch( Exception $e )
         {
-            printf( $this->oError->show_error( $this->aErrors[ 0 ], $this->aErrors[ 2 ] ), $this->getErrorCaller() );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller() );
         }
     }
     
@@ -254,7 +254,7 @@ class MY_Model extends CI_Model
         {
             if ( ! array_key_exists( $sParamName, $aArguments ) )
             {
-                printf( $this->oError->show_error( $this->aErrors[ 0 ], $this->aErrors[ 3 ]), APPPATH, $this->sConfigFile, $this->getErrorCaller( 3 ) );
+                printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 3 ]), APPPATH, $this->_sConfigFile, $this->getErrorCaller( 3 ) );
                 exit;
             }
         }
@@ -283,7 +283,7 @@ class MY_Model extends CI_Model
      */
     public function getErrorNumber()
     {
-        return $this->iLastErrorNumber;
+        return $this->_iLastErrorNumber;
     }
     
     /**
@@ -294,7 +294,7 @@ class MY_Model extends CI_Model
      */
     public function getErrorMessage()
     {
-        return $this->sLastErrorMessage;
+        return $this->_sLastErrorMessage;
     }
 
 }
