@@ -48,7 +48,7 @@
 $active_group = ENVIRONMENT;
 $active_record = FALSE;
 
-$db['default']['hostname'] = 'localhost';
+$db['default']['hostname'] = '';
 $db['default']['username'] = '';
 $db['default']['password'] = '';
 $db['default']['database'] = '';
@@ -71,7 +71,7 @@ $db['development']['database'] = '';
 $db['development']['dbdriver'] = 'oci10';
 $db['development']['dbprefix'] = '';
 $db['development']['pconnect'] = FALSE;
-$db['development']['db_debug'] = FALSE;
+$db['development']['db_debug'] = TRUE;
 $db['development']['cache_on'] = FALSE;
 $db['development']['cachedir'] = '';
 $db['development']['char_set'] = 'utf8';
