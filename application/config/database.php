@@ -45,7 +45,7 @@
 | the active record class
 */
 
-$active_group = 'localhost';
+$active_group = ENVIRONMENT;
 $active_record = FALSE;
 
 $db['default']['hostname'] = 'localhost';
@@ -64,21 +64,21 @@ $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 
-$db['localhost']['hostname'] = 'localhost/XE';
-$db['localhost']['username'] = 'HR';
-$db['localhost']['password'] = '860501';
-$db['localhost']['database'] = '';
-$db['localhost']['dbdriver'] = 'oci10';
-$db['localhost']['dbprefix'] = '';
-$db['localhost']['pconnect'] = FALSE;
-$db['localhost']['db_debug'] = FALSE;
-$db['localhost']['cache_on'] = FALSE;
-$db['localhost']['cachedir'] = '';
-$db['localhost']['char_set'] = 'utf8';
-$db['localhost']['dbcollat'] = 'utf8_general_ci';
-$db['localhost']['swap_pre'] = '';
-$db['localhost']['autoinit'] = TRUE;
-$db['localhost']['stricton'] = FALSE;
+$db['development']['hostname'] = 'localhost/XE';
+$db['development']['username'] = 'HR';
+$db['development']['password'] = '1234';
+$db['development']['database'] = '';
+$db['development']['dbdriver'] = 'oci10';
+$db['development']['dbprefix'] = '';
+$db['development']['pconnect'] = FALSE;
+$db['development']['db_debug'] = FALSE;
+$db['development']['cache_on'] = FALSE;
+$db['development']['cachedir'] = '';
+$db['development']['char_set'] = 'utf8';
+$db['development']['dbcollat'] = 'utf8_general_ci';
+$db['development']['swap_pre'] = '';
+$db['development']['autoinit'] = TRUE;
+$db['development']['stricton'] = FALSE;
 
 
 /* End of file database.php */
