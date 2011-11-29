@@ -35,7 +35,7 @@
  * 
  * @author Antonin Crha <a.crha@pixvalley.com>
  */
-class Pl extends CI_Model
+class Pl
 {
     /**
      * Configuration file location. Contains configuration for single package
@@ -87,40 +87,33 @@ class Pl extends CI_Model
      */
     private $_oError;
 
-    public function __construct ( )
-    {
-        parent::__construct();
-    }
-    
-    public function initialize( $sConfigFile )
-    {
-        $this->load->database();
-        $this->_oError = & load_class( 'Exceptions', 'core' );
-        $this->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
-        $this->_aErrors = $this->config->item( ABST_ERROR_PREFIX );
-
-        // codeigniter will instantiate this class anyway. So the hack with
-        // optional parameter is needed to prevent codeigniter from mess things
-        if ( $sConfigFile !== null )
-        {
-            $this->_loadConfiguration( $sConfigFile );
-        }
-    }
-
     /**
-     * Loads all necessery configuration files for the abstraction to work
+     * Prepares everything for this library.
      * 
      * @author Antonin Crha <a.crha@pixvalley.com>
-     * @param string $sConfigFile Path to configuration file
+     * @param string $sConfigFile Path to confgi file
+     * @param string $sActiveRecord which db configuration should be used
      */
-    private function _loadConfiguration ( $sConfigFile )
+    public function initialize( $sConfigFile, $sActiveGroup = ENVIRONMENT )
     {
-        $this->load->config( $sConfigFile );
+        if( !isset( $sConfigFile ) || $sConfigFile == '' )
+        {
+            exit('Valid config file path required. ' . 'Error origin: ' . $this->_getErrorCaller( 1 ) );
+        }
+        else
+        {
+            $this->CI = & get_instance();
+            $this->CI->db = $this->CI->load->database( $sActiveGroup, true );
 
-        $this->_sConfigFile = $sConfigFile;
-        $this->_aConfiguration = $this->config->item( PKG_CONF_PREFIX );
-        $this->_aFunctions = array_keys( $this->_aConfiguration );
-
+            $this->_sConfigFile = $sConfigFile;
+            $this->CI->load->config( $sConfigFile );
+            $this->CI->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
+            $this->_aConfiguration = $this->CI->config->item( PKG_CONF_PREFIX );
+            $this->_aFunctions = array_keys( $this->_aConfiguration );
+            
+            $this->_oError = & load_class( 'Exceptions', 'core' );
+            $this->_aErrors = $this->CI->config->item( ABST_ERROR_PREFIX );
+        }
     }
 
     /**
@@ -139,17 +132,15 @@ class Pl extends CI_Model
      */
     public function __call ( $sName, $aArguments )
     {
-        $_error = & load_class( 'Exceptions', 'core' );
-
-        if ( !in_array( $sName, $this->_aFunctions ) )
+        if ( ! in_array( $sName, $this->_aFunctions ) )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 1 ] ), $sName, APPPATH, $this->_sConfigFile, $this->getErrorCaller(1) );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 1 ] ), $sName, APPPATH, $this->_sConfigFile, $this->_getErrorCaller(1) );
             exit;
         }
 
         if ( count( $aArguments ) > 1 )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller(1) );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->_getErrorCaller(1) );
             exit;
         }
 
@@ -172,7 +163,7 @@ class Pl extends CI_Model
      */
     private function _request ( $sProcedure, $aArguments )
     {
-        $this->db->clearAllBinds(); // Performance tested. No issue here
+        $this->CI->db->clearAllBinds(); // Performance tested. No issue here
         $aProcedureDetails = $this->_aConfiguration[ $sProcedure ];
         $this->_setPrefetch( $aProcedureDetails['PREFETCH'] );
         
@@ -185,10 +176,10 @@ class Pl extends CI_Model
         $sQuery = 'BEGIN ' . $sPackage . '(' . $sSqlBinds . '); END;';
         
         // doing the actual query into database
-        if( false === $this->db->query( $sQuery ) )
+        if( false === $this->CI->db->query( $sQuery ) )
         {
-            $this->_sLastErrorMessage = $this->db->getErrorMessage();
-            $this->_iLastErrorNumber = $this->db->getErrorNumber();
+            $this->_sLastErrorMessage = $this->CI->db->getErrorMessage();
+            $this->_iLastErrorNumber = $this->CI->db->getErrorNumber();
             return false;
         }
         else
@@ -211,11 +202,11 @@ class Pl extends CI_Model
     private function _setPrefetch( $iNum = 1 )
     {
         if( is_int($iNum) && $iNum > 0 ){
-            $this->db->setPrefetch( $iNum );
+            $this->CI->db->setPrefetch( $iNum );
         }
         else
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 4 ] ), $this->getErrorCaller(3) );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 4 ] ), $this->_getErrorCaller(3) );
             exit();
         }
     }
@@ -237,12 +228,12 @@ class Pl extends CI_Model
         try{
             foreach( $aParamsOut as $sLabel => $sType )
             {
-                $this->{$sLabel} = $this->db->getOutputBinds( $sType, $sLabel );
+                $this->{$sLabel} = $this->CI->db->getOutputBinds( $sType, $sLabel );
             }
         }
         catch( Exception $e )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->getErrorCaller(1) );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->_getErrorCaller(1) );
         }
     }
     
@@ -259,7 +250,7 @@ class Pl extends CI_Model
         $sSql = '';
         foreach ( $aParamsOut as $sName => $sType )
         {
-            $this->db->addOutputBind( $sType, $sName );
+            $this->CI->db->addOutputBind( $sType, $sName );
             $sSql .= ' :' . $sName . ',';
         }
         return $sSql;
@@ -278,7 +269,7 @@ class Pl extends CI_Model
         $sSql = '';
         foreach ( $aArguments as $sName => $mValue )
         {
-            $this->db->addInputBind( $sName, $mValue );
+            $this->CI->db->addInputBind( $sName, $mValue );
             $sSql .= ' :' . $sName . ',';
         }
         return $sSql;
@@ -297,7 +288,7 @@ class Pl extends CI_Model
         {
             if ( ! array_key_exists( $sParamName, $aArguments ) )
             {
-                printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 3 ]), APPPATH, $this->_sConfigFile, $this->getErrorCaller( 3 ) );
+                printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 3 ]), APPPATH, $this->_sConfigFile, $this->_getErrorCaller( 3 ) );
                 exit;
             }
         }
@@ -312,7 +303,7 @@ class Pl extends CI_Model
      * @param intger $nStackStep Position in the callstack wanted.
      * @return string
      */
-    private function getErrorCaller ( $nStackStep = 1 )
+    private function _getErrorCaller ( $nStackStep = 1 )
     {
         $sFrom = debug_backtrace();
         return $sFrom[ $nStackStep ][ 'file' ] . ' Line: ' . $sFrom[ $nStackStep ][ 'line' ];
