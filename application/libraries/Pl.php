@@ -134,7 +134,7 @@ class Pl
     {
         if ( ! in_array( $sName, $this->_aFunctions ) )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 1 ] ), $sName, APPPATH, $this->_sConfigFile, $this->_getErrorCaller(1) );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 1 ] ), $sName, __CLASS__, APPPATH, $this->_sConfigFile, $this->_getErrorCaller(1) );
             exit;
         }
 
@@ -167,25 +167,24 @@ class Pl
         $aProcedureDetails = $this->_aConfiguration[ $sProcedure ];
         $this->_setPrefetch( $aProcedureDetails['PREFETCH'] );
         
-        $this->_checkInputParams( $aProcedureDetails, $aArguments[0] );        
-        $sSqlBinds  = '';
-        $sSqlBinds .= $this->_bindInputParams( $aArguments[0] );
+        $this->_checkInputParams( $aProcedureDetails, $aArguments[0] );
+        $sSqlBinds  = $this->_bindInputParams( $aArguments[0] );
         $sSqlBinds .= trim( $this->_bindOutputParams( $aProcedureDetails['PARAMS_OUT'] ), ',' );
         
         $sPackage = $aProcedureDetails['PACKAGE'].'.'.$aProcedureDetails['PROCEDURE'];
         $sQuery = 'BEGIN ' . $sPackage . '(' . $sSqlBinds . '); END;';
         
-        // doing the actual query into database
+        // doing query into database
         if( false === $this->CI->db->query( $sQuery ) )
         {
             $this->_sLastErrorMessage = $this->CI->db->getErrorMessage();
-            $this->_iLastErrorNumber = $this->CI->db->getErrorNumber();
+            $this->_iLastErrorNumber  = $this->CI->db->getErrorNumber();
             return false;
         }
         else
         {
-                $this->_fillOutputVariables( $aProcedureDetails['PARAMS_OUT'] );
-                return true; // request successfull
+            $this->_fillOutputVariables( $aProcedureDetails['PARAMS_OUT'] );
+            return true; // request successfull
         }
     }
     
@@ -206,7 +205,7 @@ class Pl
         }
         else
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 4 ] ), $this->_getErrorCaller(3) );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 7 ] ), $this->_getErrorCaller(3) );
             exit();
         }
     }
@@ -233,7 +232,7 @@ class Pl
         }
         catch( Exception $e )
         {
-            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 2 ] ), $this->_getErrorCaller(1) );
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 6 ] ), $this->_getErrorCaller(1) );
         }
     }
     
@@ -284,15 +283,21 @@ class Pl
      */
     private function _checkInputParams( &$aProcedureDetails, &$aArguments )
     {
+        if( count( $aProcedureDetails[ 'PARAMS_IN' ] ) !== count( $aArguments )  )
+        {
+            printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 3 ]), APPPATH, $this->_sConfigFile, $this->_getErrorCaller( 3 ) );
+            exit;
+        }
+        
         foreach ( $aProcedureDetails[ 'PARAMS_IN' ] as $nParamPos => $sParamName )
         {
             if ( ! array_key_exists( $sParamName, $aArguments ) )
             {
-                printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 3 ]), APPPATH, $this->_sConfigFile, $this->_getErrorCaller( 3 ) );
+                printf( $this->_oError->show_error( $this->_aErrors[ 0 ], $this->_aErrors[ 4 ]), APPPATH, $this->_sConfigFile, $this->_getErrorCaller( 3 ) );
                 exit;
             }
         }
-        return false;
+        return true;
     }
 
     /**
