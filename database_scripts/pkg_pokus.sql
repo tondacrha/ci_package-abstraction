@@ -14,8 +14,7 @@ CREATE OR REPLACE PACKAGE PKG_POKUS_1001 AS
 		PN$rownum IN NUMBER,
 
 		PCUR$pokus OUT SYS_REFCURSOR,
-		PN$number  OUT NUMBER,
-		PV$varchar OUT VARCHAR2
+		PN$number  OUT NUMBER
     );
 
 END PKG_POKUS_1001;
@@ -32,8 +31,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_POKUS_1001 IS
 		PN$rownum IN NUMBER,
 
 		PCUR$pokus OUT SYS_REFCURSOR,
-		PN$number  OUT NUMBER,
-		PV$varchar OUT VARCHAR2
+		PN$number  OUT NUMBER
     ) IS
     
     BEGIN
@@ -42,8 +40,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_POKUS_1001 IS
 --        INSERT INTO pokus(pokus_id, label, cfile) VALUES(seq_pokus.nextval, PV$label, PCL$cfile);
 
 		OPEN PCUR$pokus FOR SELECT * FROM pokus where rownum <= PN$rownum ORDER BY pokus_id DESC;
-		PN$number := 111;
-		PV$varchar := 'abcdefgh';
+		PN$number := 0;
     
     END INSERT_POKUS;
 

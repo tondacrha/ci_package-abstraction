@@ -35,12 +35,13 @@ define('FOPEN_WRITE_CREATE',					'ab');
 define('FOPEN_READ_WRITE_CREATE',				'a+b');
 define('FOPEN_WRITE_CREATE_STRICT',				'xb');
 define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
+define( 'PREFIX_KEY_CACHE', 'BRAINV2');
 
 
 define( 'PACKAGE_CONFIG_PATH', 'db_config/' );
 define( 'PKG_CONF_PREFIX', 'pkg' );
 define( 'ABST_ERROR_PREFIX', 'abst_errors');
-define( 'SCHEMA', 'HR.' );
+define( 'ABST_SCHEMA', 'HR.' );
 
 
 /* End of file constants.php */

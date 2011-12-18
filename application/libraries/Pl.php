@@ -102,17 +102,17 @@ class Pl
         }
         else
         {
-            $this->CI = & get_instance();
-            $this->CI->db = $this->CI->load->database( $sActiveGroup, true );
+            $this->oCI = & get_instance();
+            $this->oCI->db = $this->oCI->load->database( $sActiveGroup, true );
 
             $this->_sConfigFile = $sConfigFile;
-            $this->CI->load->config( $sConfigFile );
-            $this->CI->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
-            $this->_aConfiguration = $this->CI->config->item( PKG_CONF_PREFIX );
+            $this->oCI->load->config( $sConfigFile );
+            $this->oCI->load->config( PACKAGE_CONFIG_PATH . 'errors' . EXT );
+            $this->_aConfiguration = $this->oCI->config->item( PKG_CONF_PREFIX );
             $this->_aFunctions = array_keys( $this->_aConfiguration );
             
             $this->_oError = & load_class( 'Exceptions', 'core' );
-            $this->_aErrors = $this->CI->config->item( ABST_ERROR_PREFIX );
+            $this->_aErrors = $this->oCI->config->item( ABST_ERROR_PREFIX );
         }
     }
 
@@ -163,7 +163,7 @@ class Pl
      */
     private function _request ( $sProcedure, $aArguments )
     {
-        $this->CI->db->clearAllBinds(); // Performance tested. No issue here
+        $this->oCI->db->clearAllBinds(); // Performance tested. No issue here
         $aProcedureDetails = $this->_aConfiguration[ $sProcedure ];
         $this->_setPrefetch( $aProcedureDetails['PREFETCH'] );
         
@@ -175,10 +175,10 @@ class Pl
         $sQuery = 'BEGIN ' . $sPackage . '(' . $sSqlBinds . '); END;';
         
         // doing query into database
-        if( false === $this->CI->db->query( $sQuery ) )
+        if( false === $this->oCI->db->query( $sQuery ) )
         {
-            $this->_sLastErrorMessage = $this->CI->db->getErrorMessage();
-            $this->_iLastErrorNumber  = $this->CI->db->getErrorNumber();
+            $this->_sLastErrorMessage = $this->oCI->db->getErrorMessage();
+            $this->_iLastErrorNumber  = $this->oCI->db->getErrorNumber();
             return false;
         }
         else
@@ -201,7 +201,7 @@ class Pl
     private function _setPrefetch( $iNum = 1 )
     {
         if( is_int($iNum) && $iNum > 0 ){
-            $this->CI->db->setPrefetch( $iNum );
+            $this->oCI->db->setPrefetch( $iNum );
         }
         else
         {
@@ -227,7 +227,7 @@ class Pl
         try{
             foreach( $aParamsOut as $sLabel => $sType )
             {
-                $this->{$sLabel} = $this->CI->db->getOutputBinds( $sType, $sLabel );
+                $this->{$sLabel} = $this->oCI->db->getOutputBinds( $sType, $sLabel );
             }
         }
         catch( Exception $e )
@@ -249,7 +249,7 @@ class Pl
         $sSql = '';
         foreach ( $aParamsOut as $sName => $sType )
         {
-            $this->CI->db->addOutputBind( $sType, $sName );
+            $this->oCI->db->addOutputBind( $sType, $sName );
             $sSql .= ' :' . $sName . ',';
         }
         return $sSql;
@@ -268,7 +268,7 @@ class Pl
         $sSql = '';
         foreach ( $aArguments as $sName => $mValue )
         {
-            $this->CI->db->addInputBind( $sName, $mValue );
+            $this->oCI->db->addInputBind( $sName, $mValue );
             $sSql .= ' :' . $sName . ',';
         }
         return $sSql;
@@ -308,10 +308,10 @@ class Pl
      * @param intger $nStackStep Position in the callstack wanted.
      * @return string
      */
-    private function _getErrorCaller ( $nStackStep = 1 )
+    private function _getErrorCaller ( $iStackStep = 1 )
     {
-        $sFrom = debug_backtrace();
-        return $sFrom[ $nStackStep ][ 'file' ] . ' Line: ' . $sFrom[ $nStackStep ][ 'line' ];
+        $aFrom = debug_backtrace();
+        return $aFrom[ $iStackStep ][ 'file' ] . ' Line: ' . $aFrom[ $iStackStep ][ 'line' ];
     }
     
         /**

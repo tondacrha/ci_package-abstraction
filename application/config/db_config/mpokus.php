@@ -4,7 +4,7 @@
  * Just always put first all input params and then all output params.
  */
 
-$sPackage = SCHEMA . 'PKG_POKUS_1001';
+$sPackage = ABST_SCHEMA . 'PKG_POKUS_1001';
 
 $config[PKG_CONF_PREFIX]['insert'] = array(
     'PACKAGE' => $sPackage,
@@ -19,7 +19,6 @@ $config[PKG_CONF_PREFIX]['insert'] = array(
     'PARAMS_OUT' => array(
         'PCUR_out' => 'CURSOR',
         'PN_number' => 'NUMBER',
-        'PV_varchar' => 'VARCHAR',
     ),
 );
 
